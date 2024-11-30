@@ -1,6 +1,6 @@
 #----------------------------------------------------------------
 #VPC
-resource "aws_vpc" "VPC-MS" {
+/*resource "aws_vpc" "VPC-MS" {
   tags = {
     Name="VPC-MS"
   }
@@ -28,6 +28,17 @@ resource "aws_subnet" "Subnet-2-MS" {
 
   vpc_id = aws_vpc.VPC-MS.id
   cidr_block = "192.168.1.0/24"
+}
+
+#----------------------------------------------------------------
+#Subnet 3 [Private Subnet, linked to the main routing table, no IGW]
+resource "aws_subnet" "Subnet-3-MS" {
+  tags = {
+    name="Subnet-3-MS"
+  }
+
+  vpc_id = aws_vpc.VPC-MS.id
+  cidr_block = "192.168.2.0/24"
 }
 
 #----------------------------------------------------------------
@@ -66,6 +77,7 @@ resource "aws_route_table_association" "Route-Table-Association-MS-2" {
 
 #----------------------------------------------------------------
 #Security group
+
 resource "aws_security_group" "Security-Group-Allow-SSH-HTTP-MS" {
   tags = {
     name = "Security-Group-Allow-SSH-HTTP-MS"
@@ -121,7 +133,7 @@ resource "aws_key_pair" "keypair" {
 }
 
 #----------------------------------------------------------------
-#Apache webserver 1
+#Apache webservers
 resource "aws_instance" "Ubuntu-Webserver-MS" {
   tags = {
   Name="Ubuntu-Webserver-MS"
@@ -129,7 +141,7 @@ resource "aws_instance" "Ubuntu-Webserver-MS" {
 
   ami = "ami-0d64bb532e0502c46"
   instance_type = "t2.micro"
-  user_data = file("Apache-Userdata.sh")
+  user_data = file("userdata/Apache-Userdata.sh")
   key_name = "selfmade"
   vpc_security_group_ids = [aws_security_group.Security-Group-Allow-SSH-HTTP-MS.id]
   subnet_id = aws_subnet.Subnet-1-MS.id
@@ -138,29 +150,29 @@ metadata_options { #needed for the user data to apply????
   http_endpoint = "enabled"
   http_tokens   = "optional"
   }
+
+  count = 2
 }
 
-#----------------------------------------------------------------
-#Apache webserver 2
-resource "aws_instance" "Ubuntu-Webserver-2-MS" {
+#---------------------------------------------------------------
+resource "aws_instance" "MySQL-server-MS" {
   tags = {
-  Name="Ubuntu-Webserver-2-MS"
+  Name="MySQL-server-MS"
   }
 
   ami = "ami-0d64bb532e0502c46"
   instance_type = "t2.micro"
-  user_data = file("Apache-Userdata.sh")
+  user_data = file("userdata/Mysql-Userdata.sh")
+  key_name = "selfmade"
   vpc_security_group_ids = [aws_security_group.Security-Group-Allow-SSH-HTTP-MS.id]
   subnet_id = aws_subnet.Subnet-1-MS.id
-  key_name = aws_key_pair.keypair.key_name
 
-metadata_options { #needed for the user data to apply????
+metadata_options {
   http_endpoint = "enabled"
   http_tokens   = "optional"
   }
 }
-
-
+*/
 #----------------------------------------------------------------
 #S3-bucket
 resource "aws_s3_bucket" "Buckie" {
@@ -169,4 +181,67 @@ resource "aws_s3_bucket" "Buckie" {
   }
 
   bucket = "buckie-the-bucket"
+}
+
+#----------------------------------------------------------------
+#Lambda
+# Lambda Function
+resource "aws_lambda_function" "file_upload_lambda" {
+  function_name = "FileUploadFunction"
+  runtime       = "python3.9"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "lambda_function.lambda_handler"
+
+  # Path to your deployment package (ZIP file)
+  filename = "lambda_function.zip"
+
+  environment {
+    variables = {
+      S3_BUCKET = aws_s3_bucket.Buckie.id
+    }
+  }
+}
+
+# API Gateway (Optional)
+resource "aws_api_gateway_rest_api" "upload_api" {
+  name = "FileUploadAPI"
+}
+
+resource "aws_api_gateway_resource" "upload_resource" {
+  rest_api_id = aws_api_gateway_rest_api.upload_api.id
+  parent_id   = aws_api_gateway_rest_api.upload_api.root_resource_id
+  path_part   = "upload"
+}
+
+resource "aws_api_gateway_method" "upload_method" {
+  rest_api_id   = aws_api_gateway_rest_api.upload_api.id
+  resource_id   = aws_api_gateway_resource.upload_resource.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_lambda_permission" "api_gateway_invoke" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.file_upload_lambda.arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.upload_api.execution_arn}/*/*"
+}
+
+resource "aws_api_gateway_integration" "upload_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.upload_api.id
+  resource_id             = aws_api_gateway_resource.upload_resource.id
+  http_method             = aws_api_gateway_method.upload_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.file_upload_lambda.invoke_arn
+}
+
+resource "aws_api_gateway_deployment" "upload_deployment" {
+  rest_api_id = aws_api_gateway_rest_api.upload_api.id
+  depends_on  = [aws_api_gateway_integration.upload_integration]
+}
+
+output "api_endpoint" {
+  value = "${aws_api_gateway_rest_api.upload_api.execution_arn}/upload"
 }

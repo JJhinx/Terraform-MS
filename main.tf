@@ -1,6 +1,6 @@
 #----------------------------------------------------------------
 #VPC
-/*resource "aws_vpc" "VPC-MS" {
+resource "aws_vpc" "VPC-MS" {
   tags = {
     Name="VPC-MS"
   }
@@ -133,7 +133,7 @@ resource "aws_key_pair" "keypair" {
 }
 
 #----------------------------------------------------------------
-#Apache webservers
+#Apache webserver - MySQL server
 resource "aws_instance" "Ubuntu-Webserver-MS" {
   tags = {
   Name="Ubuntu-Webserver-MS"
@@ -146,12 +146,12 @@ resource "aws_instance" "Ubuntu-Webserver-MS" {
   vpc_security_group_ids = [aws_security_group.Security-Group-Allow-SSH-HTTP-MS.id]
   subnet_id = aws_subnet.Subnet-1-MS.id
 
-metadata_options { #needed for the user data to apply????
+metadata_options {
   http_endpoint = "enabled"
   http_tokens   = "optional"
   }
 
-  count = 2
+  count = 3
 }
 
 #---------------------------------------------------------------

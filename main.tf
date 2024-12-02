@@ -145,13 +145,14 @@ resource "aws_instance" "Ubuntu-Webserver-MS" {
   key_name = "selfmade"
   vpc_security_group_ids = [aws_security_group.Security-Group-Allow-SSH-HTTP-MS.id]
   subnet_id = aws_subnet.Subnet-1-MS.id
+  associate_public_ip_address = "true"
 
 metadata_options {
   http_endpoint = "enabled"
   http_tokens   = "optional"
   }
 
-  count = 3
+  count = 2
 }
 
 #---------------------------------------------------------------
@@ -162,7 +163,7 @@ resource "aws_instance" "MySQL-server-MS" {
 
   ami = "ami-0d64bb532e0502c46"
   instance_type = "t2.micro"
-  user_data = file("userdata/Mysql-Userdata.sh")
+  user_data = file("Mysql-Userdata.sh")
   key_name = "selfmade"
   vpc_security_group_ids = [aws_security_group.Security-Group-Allow-SSH-HTTP-MS.id]
   subnet_id = aws_subnet.Subnet-1-MS.id
@@ -172,7 +173,7 @@ metadata_options {
   http_tokens   = "optional"
   }
 }
-*/
+
 #----------------------------------------------------------------
 #S3-bucket
 resource "aws_s3_bucket" "Buckie" {
@@ -189,7 +190,7 @@ resource "aws_s3_bucket" "Buckie" {
 resource "aws_lambda_function" "file_upload_lambda" {
   function_name = "FileUploadFunction"
   runtime       = "python3.9"
-  role          = aws_iam_role.lambda_role.arn
+  role          = aws_iam_role.lambda.arn
   handler       = "lambda_function.lambda_handler"
 
   # Path to your deployment package (ZIP file)
@@ -202,7 +203,7 @@ resource "aws_lambda_function" "file_upload_lambda" {
   }
 }
 
-# API Gateway (Optional)
+# API Gateway
 resource "aws_api_gateway_rest_api" "upload_api" {
   name = "FileUploadAPI"
 }
@@ -242,6 +243,14 @@ resource "aws_api_gateway_deployment" "upload_deployment" {
   depends_on  = [aws_api_gateway_integration.upload_integration]
 }
 
-output "api_endpoint" {
-  value = "${aws_api_gateway_rest_api.upload_api.execution_arn}/upload"
+resource "aws_api_gateway_stage" "name" {
+  deployment_id = aws_api_gateway_deployment.upload_deployment.id
+  stage_name  = "prod"
+  rest_api_id = aws_api_gateway_rest_api.upload_api.id
 }
+
+# Output the API endpoint URL
+output "api_endpoint" {
+  value = "https://${aws_api_gateway_rest_api.upload_api.id}.execute-api.${var.region}.amazonaws.com/prod/upload"
+}
+

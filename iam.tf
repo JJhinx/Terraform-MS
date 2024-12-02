@@ -34,3 +34,12 @@ resource "aws_iam_role_policy" "lambda_s3_policy" {
 
   policy = data.aws_iam_policy_document.s3_permissions.json
 }
+
+data "aws_iam_role" "FullAccessToS3" {
+  name = "EC2fullAccessToS3"
+}
+
+resource "aws_iam_instance_profile" "FullAccessToS3Profile" {
+  name = "FullAccessToS3Profile"
+  role = data.aws_iam_role.FullAccessToS3.name
+}

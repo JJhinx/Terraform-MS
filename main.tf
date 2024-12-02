@@ -147,6 +147,8 @@ resource "aws_instance" "Ubuntu-Webserver-MS" {
   subnet_id = aws_subnet.Subnet-1-MS.id
   associate_public_ip_address = "true"
 
+  iam_instance_profile = data.aws_iam_role.FullAccessToS3.name
+
 metadata_options {
   http_endpoint = "enabled"
   http_tokens   = "optional"

@@ -2,8 +2,8 @@ provider "aws" {
   region = var.region
   #sets the provider to aws
 
-  #access_key = "nono"
-  #secret_key = "not today"
+  access_key = "AKIAR3HUOTP4GSXHS2L5"
+  secret_key = "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"
 
 }
 

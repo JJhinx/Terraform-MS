@@ -4,7 +4,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/JJhinx/Terraform-MS'
+                git branch: 'main',
+                    url: 'https://github.com/JJhinx/Terraform-MS'
             }
         }
         stage('Terraform Init') {

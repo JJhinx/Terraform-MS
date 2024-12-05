@@ -30,6 +30,8 @@ resource "aws_instance" "Ubuntu-Webserver-MS" {
 
   iam_instance_profile = data.aws_iam_role.FullAccessToS3.name
 
+  count = 2
+
 metadata_options {
   http_endpoint = "enabled"
   http_tokens   = "optional"

@@ -3,7 +3,7 @@ variable "region" {
   default = "eu-west-1"
 }
 
-variable "mysql_root_password" {
+variable "db_rootpw" {
   default = "tryout"
   sensitive = true
 }

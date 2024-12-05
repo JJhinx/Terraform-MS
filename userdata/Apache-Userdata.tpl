@@ -16,3 +16,4 @@ echo "for filename in \$(ls -1 /var/www/html); do mysql -u remuser -premuser -h 
 sudo chmod 755 /home/ubuntu/sqlInsert.sh
 echo "* * * * * root sudo /home/ubuntu/sqlInsert.sh" >> /etc/crontab
 
+

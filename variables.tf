@@ -7,3 +7,4 @@ variable "db_rootpw" {
   default = "tryout"
   sensitive = true
 }
+

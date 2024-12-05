@@ -119,3 +119,4 @@ resource "aws_security_group" "Security-Group-Allow-SSH-HTTP-MS" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+

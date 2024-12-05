@@ -17,3 +17,4 @@ sudo mysql -u root -psecret -e  "FLUSH PRIVILEGES;" >> /home/ubuntu/mysql.sh
 sudo mysql -u root -psecret -e "CREATE DATABASE IF NOT EXISTS files;"
 sleep 10
 sudo mysql -u root -psecret -e "USE files; CREATE TABLE IF NOT EXISTS file (name VARCHAR(255) PRIMARY KEY);"
+

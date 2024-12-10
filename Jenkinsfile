@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage {
+        stage('credentials') {
             withCredentials([sshUserPrivateKey(
             credentialsId: '3a643f94-65c9-421a-905a-93a12cfca59e',
             keyFileVariable: 'SSH_KEY')])

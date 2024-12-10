@@ -2,6 +2,14 @@ pipeline {
     agent any
 
     stages {
+        stage {
+            withCredentials([sshUserPrivateKey(
+            credentialsId: '3a643f94-65c9-421a-905a-93a12cfca59e',
+            keyFileVariable: 'SSH_KEY')])
+        {
+            sh 'cp "$SSH_KEY" jenkins-aws.pem'
+        }
+        }
         stage('Checkout') {
             steps {
                 git branch: 'main',

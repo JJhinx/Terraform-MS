@@ -5,7 +5,7 @@ sudo apt-get install -y mysql-server
 sudo systemctl start mysql
 sudo systemctl enable mysql
 sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'secret'";
-echo s/127.0.0.1/192.168.0.200/g >> sed.sed
+echo s/127.0.0.1/192.168.2.200/g >> sed.sed
 sudo sed -f sed.sed /etc/mysql/mysql.conf.d/mysqld.cnf -i
 systemctl restart mysql
 

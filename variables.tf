@@ -3,8 +3,10 @@ variable "region" {
   default = "eu-west-1"
 }
 
-variable "db_rootpw" {
-  default = "tryout"
-  sensitive = true
+variable "ssh_private_key_file" {
+  default = "jenkins-aws.pem"
 }
 
+locals {
+  ssh_private_key_content = file(var.ssh_private_key_file)
+}

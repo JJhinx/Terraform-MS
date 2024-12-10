@@ -7,9 +7,7 @@ pipeline {
                     script {
                         // Run Terraform commands using AWS credentials
                         sh '''
-                            terraform init
-                            terraform plan -out=tfplan
-                            terraform apply
+                            terraform destroy
                         '''
                     }
                 }

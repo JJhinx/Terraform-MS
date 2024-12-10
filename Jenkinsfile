@@ -13,7 +13,7 @@ pipeline {
                         //'''
 
                         sh '''
-                            terraform destroy
+                            terraform destroy -auto-aprove
                         '''
                     }
                 }

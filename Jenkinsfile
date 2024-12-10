@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Setup AWS Credentials') {
             steps {
-                withAWS(credentials: 'aws_credentials_id', region: 'us-west-2') {
+                withAWS(credentials: 'aws_creds', region: 'eu-west-1') {
                     script {
                         // Run Terraform commands using AWS credentials
                         sh '''

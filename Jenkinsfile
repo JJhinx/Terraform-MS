@@ -7,7 +7,7 @@ pipeline {
                     script {
                         // Run Terraform commands using AWS credentials
                         sh '''
-                            terraform apply -auto-approve
+                            terraform destroy -auto-approve
                         '''
                     }
                 }

@@ -42,3 +42,8 @@ resource "aws_lb_target_group_attachment" "LoadBalancerGroupAttachment" {
     target_id         = aws_instance.Ubuntu-Webserver-MS[count.index].id
     port              = 80
 }
+
+#output the ip of the loadbalancer
+output "LoadBalancer_IP" {
+    value = aws_lb.LoadBalancer.dns_name
+}

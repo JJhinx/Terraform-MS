@@ -17,6 +17,8 @@ resource "aws_subnet" "Subnet-1-MS" {
 
   vpc_id = aws_vpc.VPC-MS.id
   cidr_block = "192.168.0.0/24"
+
+  availability_zone = "eu-west-1a"
 }
 
 #----------------------------------------------------------------
@@ -28,6 +30,8 @@ resource "aws_subnet" "Subnet-2-MS" {
 
   vpc_id = aws_vpc.VPC-MS.id
   cidr_block = "192.168.1.0/24"
+
+  availability_zone = "eu-west-1b"
 }
 
 #----------------------------------------------------------------

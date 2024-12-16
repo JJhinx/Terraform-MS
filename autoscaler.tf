@@ -14,7 +14,6 @@ resource "aws_autoscaling_group" "ASG-MS" {
 
     health_check_type = "EC2"
     target_group_arns = [aws_lb_target_group.LoadBalancerTargetGroup.arn]
-    #availability_zones = [ "eu-west-1a", "eu-west-1b", "eu-west-1c" ]
     vpc_zone_identifier = [aws_subnet.Subnet-1-MS.id, aws_subnet.Subnet-2-MS.id]
 
     tag {

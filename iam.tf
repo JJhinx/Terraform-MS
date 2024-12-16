@@ -1,3 +1,4 @@
+#Lambda role
 data "aws_iam_policy_document" "assumerole" {
   statement {
     effect = "Allow"
@@ -12,19 +13,19 @@ data "aws_iam_policy_document" "assumerole" {
 data "aws_iam_policy_document" "s3_permissions" {
   statement {
     effect    = "Allow"
-    actions   = ["s3:PutObject", "s3:GetObject"]
+    actions   = ["s3:*"]
     resources = [
-      "arn:aws:s3:::buckie-the-bucket/*"  # Replace with your S3 bucket name
+      "arn:aws:s3:::buckie-the-bucket","arn:aws:s3:::buckie-the-bucket/*" 
     ]
   }
 }
 
 resource "aws_iam_role" "lambda" {
-  name               = "LambdaIAM"  # Specify the role name
+  name               = "LambdaIAM"
   assume_role_policy = data.aws_iam_policy_document.assumerole.json
 
   tags = {
-    Environment = "Production"  # Example of key-value pairs for tags
+    Environment = "Production"
   }
 }
 
@@ -35,11 +36,34 @@ resource "aws_iam_role_policy" "lambda_s3_policy" {
   policy = data.aws_iam_policy_document.s3_permissions.json
 }
 
-data "aws_iam_role" "FullAccessToS3" {
-  name = "EC2fullAccessToS3"
+#----------------------------------------------------------------
+#EC2 role
+data "aws_iam_policy_document" "AssumeEC2fullAccessToS3" {
+  statement {
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
+  }
 }
 
-resource "aws_iam_instance_profile" "FullAccessToS3Profile" {
-  name = "FullAccessToS3Profile"
-  role = data.aws_iam_role.FullAccessToS3.name
+resource "aws_iam_role" "EC2FullAccessToS3Role" {
+  assume_role_policy = data.aws_iam_policy_document.AssumeEC2fullAccessToS3.json
+  name               = "EC2FullAccessToS3Role"
+
+  tags = {
+    Environment = "Production"
+  }
+}
+
+resource "aws_iam_role_policy" "EC2_s3_policy" {
+  role = aws_iam_role.EC2FullAccessToS3Role.id
+  policy = data.aws_iam_policy_document.s3_permissions.json
+}
+
+resource "aws_iam_instance_profile" "EC2FullAccessToS3Profile" {
+  name = "EC2FullAccessToS3Profile"
+  role = aws_iam_role.EC2FullAccessToS3Role.name
 }

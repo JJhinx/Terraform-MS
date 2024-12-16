@@ -1,5 +1,4 @@
 #!/bin/bash
-sudo mkdir /home/test
 sudo apt-get update -y
 sudo apt-get install -y mysql-server
 sudo systemctl start mysql

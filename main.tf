@@ -21,14 +21,13 @@ resource "aws_instance" "Ubuntu-Webserver-MS" {
 
   ami = "ami-0d64bb532e0502c46"
   instance_type = "t2.micro"
-  #user_data = file("userdata/Apache-Userdata.sh")
   user_data = data.template_file.userdata-Apache-MS.rendered
   key_name = "selfmade2"
   vpc_security_group_ids = [aws_security_group.Security-Group-Allow-SSH-HTTP-MS.id]
   subnet_id = aws_subnet.Subnet-1-MS.id
   associate_public_ip_address = "true"
 
-  iam_instance_profile = data.aws_iam_role.FullAccessToS3.name
+  iam_instance_profile = aws_iam_instance_profile.EC2FullAccessToS3Profile.name
   count = 2
 
 metadata_options {
@@ -46,7 +45,6 @@ resource "aws_instance" "MySQL-server-MS" {
 
   ami = "ami-0d64bb532e0502c46"
   instance_type = "t2.micro"
-  #user_data = file("userdata/Mysql-Userdata.tpl")
   user_data = data.template_file.userdata-MySQL-MS.rendered
   key_name = "selfmade2"
   vpc_security_group_ids = [aws_security_group.Security-Group-Allow-SSH-HTTP-MS.id]
